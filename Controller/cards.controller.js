@@ -1,9 +1,9 @@
 const {cards} = require("../models");
 
 const createCard = async (req, res) => {
-  const {frontContent, backContent, deskId} = req.body;
+  const {frontContent, backContent, deskId, imageUrl} = req.body;
   try {
-      const newCard = await cards.create({frontContent, backContent, deskId});
+      const newCard = await cards.create({frontContent, backContent, deskId, imageUrl});
       res.status(201).send(newCard);
   } catch (error) {
       res.status(500).send(error);
@@ -35,10 +35,11 @@ const deleteCard = async (req, res) => {
 
 const updateCards = async (req, res) => {
     const {id} = req.params;
-    const {frontContent, backContent} = req.body;
+    const {frontContent, backContent, imageUrl} = req.body;
     try {
         if (frontContent) await cards.update({frontContent}, {where: {id}});
         if (backContent) await cards.update({backContent}, {where: {id}});
+        if (imageUrl) await cards.update({imageUrl}, {where: {id}});
         const cardFind = await cards.findOne({where: {id}});
         res.send(cardFind);
     } catch (error) {

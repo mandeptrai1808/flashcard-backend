@@ -14,6 +14,9 @@ module.exports = {
       backContent: {
         type: Sequelize.STRING
       },
+      imageUrl: {
+        type: Sequelize.STRING
+      },
       deskId: {
         type: Sequelize.INTEGER,
         reference: {

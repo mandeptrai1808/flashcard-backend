@@ -21,7 +21,7 @@ const loginUser = async (req,res) => {
     if (userFind){
       const isLogin = bcrypt.compareSync(password, userFind.password);
       if (isLogin){
-          const token = jsonwt.sign({email: userFind.email}, "mandeptrai30cm", {expiresIn: 60*60*24});
+          const token = jsonwt.sign({email: userFind.email, id: userFind.id}, "mandeptrai30cm", {expiresIn: 60*60*24});
           res.send({msg:"Login success!",userFind, token})
       }
       else res.status(400).send("Password incorrect!");

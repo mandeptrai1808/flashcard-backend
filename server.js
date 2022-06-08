@@ -3,11 +3,19 @@ const app = express();
 const path = require("path");
 const { sequelize } = require("./models");
 const { rootRouter } = require("./Router");
+const cors = require("cors");
 
 
 const PORT = process.env.PORT || 6969;
 
 app.use(express.json());
+
+
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 const publicPath = path.join(__dirname, "./Public");
 app.use("/Public", express.static(publicPath));
