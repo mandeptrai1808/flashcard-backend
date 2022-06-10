@@ -1,4 +1,4 @@
-const { desks, sequelize, cards } = require("../models");
+const { desks, sequelize, cards, Sequelize } = require("../models");
 
 const createDesk = async (req, res) => {
   const { name, userId, status } = req.body;
@@ -19,10 +19,17 @@ const createDesk = async (req, res) => {
 const getDeskById = async (req, res) => {
   const { id } = req.params;
   try {
-    const findDesk = await desks.findOne({ where: { id } });
+    // const findDesk = await desks.findOne({ where: { id } });
+    const findDesk = await sequelize.query(`
+    SELECT flashcard_db.desks.id, flashcard_db.desks.name,flashcard_db.desks.userId, flashcard_db.desks.likes, flashcard_db.desks.rates, flashcard_db.desks.status,
+    flashcard_db.users.name as username, flashcard_db.users.avatar  FROM flashcard_db.desks
+    inner join flashcard_db.users
+    on flashcard_db.users.id = flashcard_db.desks.userId
+    where flashcard_db.desks.id = ${id};  
+    `)
     const findCards = await cards.findAll({ where: { deskId: id } });
 
-    res.send({ desk: findDesk, cards: findCards });
+    res.send({ desk: findDesk[0][0], cards: findCards });
   } catch (error) {
     res.status(500).send(error);
   }
