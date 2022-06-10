@@ -1,4 +1,4 @@
-const { desks, sequelize, cards, Sequelize } = require("../models");
+const { desks, sequelize,likes, cards, rates } = require("../models");
 
 const createDesk = async (req, res) => {
   const { name, userId, status } = req.body;
@@ -28,6 +28,11 @@ const getDeskById = async (req, res) => {
     where flashcard_db.desks.id = ${id};  
     `)
     const findCards = await cards.findAll({ where: { deskId: id } });
+    const listLikes = await likes.findAll({where: {deskId: id}});
+    const listRates = await rates.findAll({where: {deskId: id}})
+    findDesk[0][0].likes = listLikes;
+    findDesk[0][0].rates = listRates;
+
 
     res.send({ desk: findDesk[0][0], cards: findCards });
   } catch (error) {
@@ -58,7 +63,9 @@ const getDesksByUserId = async (req, res) => {
 
     deskList[0].map(async (item, index) => {
       let numCard = await cards.findAll({ where: { deskId: item.id } });
-      deskList[0][index] = { ...deskList[0][index], numCard: numCard.length };
+      let listLike = await likes.findAll({where: {deskId: item.id}});
+      let listRate = await rates.findAll({where: {deskId: item.id}});
+      deskList[0][index] = { ...deskList[0][index], numCard: numCard.length, likes: listLike, rates: listRate };
       if (deskList[0].length - 1 === index) res.send(deskList[0]);
     });
     // res.send(deskList[0]);
