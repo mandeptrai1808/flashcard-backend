@@ -1,4 +1,4 @@
-const { desks, sequelize,likes, cards, rates } = require("../models");
+const { desks, sequelize,likes, cards, rates, users } = require("../models");
 
 const createDesk = async (req, res) => {
   const { name, userId, status } = req.body;
@@ -74,6 +74,61 @@ const getDesksByUserId = async (req, res) => {
   }
 };
 
+const getDesksLikedByUserId = async (req, res) => {
+  const {userId} = req.params;
+  try {
+    const deskList = await sequelize.query(`
+    SELECT flashcard_db.desks.id, flashcard_db.desks.name,flashcard_db.desks.userId, flashcard_db.desks.likes, flashcard_db.desks.rates, flashcard_db.desks.status,
+flashcard_db.users.name as username, flashcard_db.users.avatar FROM flashcard_db.desks
+inner join flashcard_db.users
+on flashcard_db.users.id = flashcard_db.desks.userId
+inner join flashcard_db.likes
+on flashcard_db.likes.deskId = flashcard_db.desks.id
+where flashcard_db.likes.userId = ${userId};
+      `);
+
+    deskList[0].map(async (item, index) => {
+      let numCard = await cards.findAll({ where: { deskId: item.id } });
+      let listLike = await likes.findAll({where: {deskId: item.id}});
+      let listRate = await rates.findAll({where: {deskId: item.id}});
+      deskList[0][index] = { ...deskList[0][index], numCard: numCard.length, likes: listLike, rates: listRate };
+      if (deskList[0].length - 1 === index) res.send(deskList[0]);
+    });
+    // res.send(deskList[0]);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+const getHistoryDesks = async (req, res) => {
+  const {userId} = req.params;
+  try {
+    const deskList = await sequelize.query(`
+    SELECT flashcard_db.desks.id, flashcard_db.histories.id as history_id, flashcard_db.desks.name, flashcard_db.desks.userId,
+flashcard_db.desks.likes, flashcard_db.desks.rates, flashcard_db.desks.status,
+flashcard_db.users.name as username, flashcard_db.users.avatar FROM flashcard_db.histories
+inner join flashcard_db.users
+on flashcard_db.users.id = flashcard_db.histories.userId
+inner join flashcard_db.desks
+on flashcard_db.desks.id = flashcard_db.histories.deskId
+where flashcard_db.users.id = ${userId};
+      `);
+    deskList[0].map(async (item, index) => {
+      let numCard = await cards.findAll({ where: { deskId: item.id } });
+      let listLike = await likes.findAll({where: {deskId: item.id}});
+      let listRate = await rates.findAll({where: {deskId: item.id}});
+      let ownOfDesk = await users.findOne({where: {id: item.userId}});
+      deskList[0][index].username = ownOfDesk.name;
+      deskList[0][index].avatar = ownOfDesk.avatar;
+      deskList[0][index] = { ...deskList[0][index] ,numCard: numCard.length, likes: listLike, rates: listRate };
+      if (deskList[0].length - 1 === index) res.send(deskList[0]);
+    });
+    // res.send(deskList[0]);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
 const updateDesks = async (req, res) => {
   const { id } = req.params;
   const { name, status } = req.body;
@@ -93,4 +148,6 @@ module.exports = {
   getDesksByUserId,
   updateDesks,
   getDeskById,
+  getDesksLikedByUserId,
+  getHistoryDesks
 };

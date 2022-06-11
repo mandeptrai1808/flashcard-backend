@@ -49,11 +49,12 @@ const uploadAvatar= async (req, res) => {
 }
 
 const updateUser = async (req, res) => {
-    const {name, phone} = req.body;
+    const {name, phone, avatar} = req.body;
     const {id} = req.params;
     try {
       if(name) await users.update({name}, {where: {id}});
       if(phone) await users.update({phone}, {where: {id}});
+      if(avatar) await users.update({avatar},{where: {id}})
       const userFind = await users.findOne({where: {id}});
       res.send({msg: "Updated!", userFind});
         
