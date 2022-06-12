@@ -7,7 +7,7 @@ const createUser = async (req, res) => {
   const hashPassword = bcrypt.hashSync(password, salt);
 
   try {
-    const avatar = `https://ui-avatars.com/api/?name=${name}`;
+    const avatar = `https://cdn.memes.com/profilepics/26946701617040571/imageThumb/1617040787_thumb.jpg`;
     const newUser = await users.create({name, email, phone, password: hashPassword, avatar});
     res.status(201).send(newUser);
   } catch (error) {
